@@ -1,0 +1,44 @@
+:root {
+  --ink: #1c1b19;
+  --paper: #efece4;
+  --paper-raised: #f8f6f0;
+  --rule: #d8d3c5;
+  --accent: #3d5a4c; /* deep moss — synapse pulse */
+  --accent-soft: #cdd9d0;
+  --gmail: #b3543f;
+  --drive: #3d6b8a;
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  min-height: 100vh;
+}
+
+.mono {
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.01em;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+a { color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
