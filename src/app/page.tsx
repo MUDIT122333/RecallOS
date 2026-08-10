@@ -25,22 +25,9 @@ export default function Home() {
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-useEffect(() => {
+  useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
-
-  // After the OAuth redirect lands back here with ?connected=1, kick off
-  // sync automatically instead of making the user click "sync now" twice.
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("connected") === "1") {
-      // Clean the query param off the URL so a page refresh doesn't
-      // re-trigger sync every time.
-      window.history.replaceState({}, "", window.location.pathname);
-      handleSync();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   async function handleSync() {
     setSyncing(true);
