@@ -11,27 +11,7 @@ Explicitly declined to implement (see SPEC.md §2 for reasoning):
 - Slack/Notion connectors (interface left extensible; not built).
 - Hosted persistent DB (local JSON store; noted as a swap-in for prod).
 
-## v1.2
 
-Two production-readiness fixes found while testing the live Vercel deploy:
-
-1. **Storage migration.** The local JSON file store crashed on Vercel's
-   serverless functions (read-only filesystem outside `/tmp`, and even
-   `/tmp` doesn't persist between invocations). Migrated `src/lib/store.ts`
-   to a dual backend: Upstash Redis when `UPSTASH_REDIS_REST_URL` /
-   `UPSTASH_REDIS_REST_TOKEN` are set (production), local JSON file
-   otherwise (local dev, unchanged experience, zero setup). This required
-   making the store's interface async and updating every caller
-   (`google.ts`, `gmail.ts`, `drive.ts`, all three API routes) to await
-   it — SPEC.md §2/§8 updated accordingly. Interface shape
-   (`loadDocs`/`saveDocs`/`upsertDocs`/`loadTokens`/`saveTokens`) is
-   unchanged, so retrieval/reasoning/UI code needed no changes.
-2. **Gmail sync speed.** `syncGmail` was fetching message details one at a
-   time in a sequential loop (145s for 150 messages locally), which
-   exceeds serverless function time limits. Switched to batched parallel
-   fetches (10 concurrent) and lowered the default `maxResults` from 150
-   to 60. Also added `export const maxDuration = 60` to the sync route to
-   use the full time budget Vercel's Hobby plan allows.
 
 ## v1.1
 
