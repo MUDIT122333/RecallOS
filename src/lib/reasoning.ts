@@ -30,6 +30,31 @@ function formatDoc(r: SearchResult, i: number): string {
   return `[Doc ${i + 1}] source=${d.source} title="${d.title}" date=${d.date}\n${d.body || d.snippet}`;
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Gemini occasionally returns 503 UNAVAILABLE during brief capacity spikes
+ * on Google's side — not a bug in this app. Retry a couple of times with
+ * short backoff before giving up, so a transient blip doesn't fail the
+ * whole request (and doesn't ruin a live demo).
+ */
+async function sendMessageWithRetry(chat: any, message: string, maxAttempts = 3) {
+  let lastErr: any;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await chat.sendMessage({ message });
+    } catch (err: any) {
+      lastErr = err;
+      const is503 = err?.status === 503 || String(err?.message || "").includes("UNAVAILABLE");
+      if (!is503 || attempt === maxAttempts) throw err;
+      await sleep(attempt * 1000); // 1s, then 2s
+    }
+  }
+  throw lastErr;
+}
+
 export async function answerQuery(
   query: string,
   results: SearchResult[],
@@ -65,7 +90,7 @@ export async function answerQuery(
     config: { systemInstruction: SYSTEM_PROMPT },
   });
 
-  const response = await chat.sendMessage({ message: userTurn });
+  const response = await sendMessageWithRetry(chat, userTurn);
   const answer = (response.text || "").trim();
 
   const citations: ChatCitation[] = results.map((r) => ({
