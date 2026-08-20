@@ -10,7 +10,6 @@
   "dependencies": {
     "@google/genai": "^2.15.0",
     "@upstash/redis": "^1.38.2",
-    "gbrain": "../gbrain",
     "googleapis": "^140.0.1",
     "next": "14.2.35",
     "react": "18.3.1",
